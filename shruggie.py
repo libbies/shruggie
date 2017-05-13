@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import discord
 import re
-import time
 
 from config import *
 from helpers import logger, debug
@@ -57,9 +56,13 @@ async def on_message(message):
 
     # handle admin commands
     if message.channel.name == 'mod-channel'
-        if not message.author.server_permissions.administrator:
-            return
+        # print a list of the bot's commands
+        if message.content[0:5] == '!help':
+            return await bot.send_message(message.channel,
+                'my available commands are: `!help` `!say` `!list` `!add` `!remove`',
+            )
 
+        # have the bot say something in another channel:
         if message.content[0:4] == '!say':
             channel = message.content.split()[1]
             if channel[0:2] == '<#' and ch[-1] == '>':
@@ -72,11 +75,6 @@ async def on_message(message):
             if not channel:
                 return await bot.send_message(message.channel, 'no such channel')
             return await bot.send_message(channel, ' '.join(message.content.split()[2:]))
-
-        if message.content[0:5] == '!help':
-            return await bot.send_message(message.channel,
-                'my available commands are: `!say` `!list` `!add` `!remove`',
-            )
 
         # any bot command below this line is only accessible by server administrators
         if not message.author.server_permissions.administrator:
