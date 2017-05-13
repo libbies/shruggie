@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 import discord
 import re
+import time
 
+from config import *
 from helpers import logger, debug
 
 bot = discord.Client()
@@ -16,13 +18,6 @@ whitelist = [
     'gfycat.com',
     'twitter.com',
 ]
-
-channels = dict()
-async def update_state(server):
-    """update internal bot state"""
-    for channel in server.channels:
-        if not channels.get(server.id + channel.name):
-            channels[server.id + channel.name] = channel.id
 
 @bot.event
 async def on_message_edit(bmessage, message):
@@ -57,22 +52,23 @@ async def on_message(message):
 
     # !repr :3
     if message.channel.name == 'technical-nonsense' and message.content[0:5] == '!repr':
-        await update_state(message.server)
-        return await bot.send_message(message.channel, repr(channels))
+        return await bot.send_message(message.channel, repr(bot))
 
     # handle admin commands
     if message.channel.name == 'mod-channel' and message.author.server_permissions.administrator:
         if message.content[0:4] == '!say':
-            await update_state(message.server)
             channel = message.content.split()[1]
             if channel[0:2] == '<#' and channel[-1] == '>':
-                channel_id = channel[2:-1]
+                dst = message.server.get_channel(channel[2:-1])
             else:
-                if not channels.get(message.server.id+channel):
-                    return await bot.send_message(message.channel, "no such channel")
-                channel_id = channels.get(message.server.id+channel)
-            return await bot.send_message(message.server.get_channel(channel_id),
-                    " ".join(message.content.split()[2:]),
+                dst = discord.utils.get(message.server.channels,
+                    name=channel,
+                    type=discord.ChannelType.text
+                )
+            if not dst:
+                return await bot.send_message(message.channel, "no such channel")
+            return await bot.send_message(dst,
+                " ".join(message.content.split()[2:]),
             )
 
         success = False
@@ -119,26 +115,29 @@ async def on_message(message):
                             repr(message.content),
                         ))
                         await bot.delete_message(message)
-                        for channel in message.server.channels:
-                            if channel.name == 'mod-channel' and channel.type.text:
-                                return await bot.send_message(channel,
-                                    'deleted message from {}: ```{} {}#{}: {}```'.format(
-                                    message.author.mention,
-                                    message.timestamp.strftime("[%I:%M %p]"),
-                                    message.author.name,
-                                    message.author.discriminator,
-                                    message.content,
-                                ))
+                        mod_channel = discord.utils.get(message.server.channels,
+                            name='mod-channel',
+                            type=discord.ChannelType.text,
+                        )
+                        return await bot.send_message(mod_channel,
+                            'deleted message from {}: ```{} {}#{}: {}```'.format(
+                                message.author.mention,
+                                message.timestamp.strftime("[%I:%M %p]"),
+                                message.author.name,
+                                message.author.discriminator,
+                                message.content,
+                            ))
 
 @bot.event
 async def on_ready():
     debug('login: {}#{}'.format(bot.user.name, bot.user.discriminator))
-
-@bot.event
-async def on_server_join(server):
-    await update_state(server)
+    for server in bot.servers:
+        if server.get_member(bot.user.id).display_name != SHRUGGIE_NICK_NAME:
+            await bot.change_nickname(server.get_member(bot.user.id),
+                SHRUGGIE_NICK_NAME,
+            )
 
 try:
-    bot.run('APP BOT USER TOKEN GOES HERE')
+    bot.run(SHRUGGIE_APP_TOKEN)
 except:
     logger('debug').exception("exception:")
