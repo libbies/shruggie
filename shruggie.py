@@ -55,7 +55,10 @@ async def on_message(message):
         return await bot.send_message(message.channel, repr(bot))
 
     # handle admin commands
-    if message.channel.name == 'mod-channel' and message.author.server_permissions.administrator:
+    if message.channel.name == 'mod-channel'
+        if not message.author.server_permissions.administrator:
+            return
+
         if message.content[0:4] == '!say':
             channel = message.content.split()[1]
             if channel[0:2] == '<#' and ch[-1] == '>':
@@ -71,11 +74,15 @@ async def on_message(message):
 
         if message.content[0:5] == '!help':
             return await bot.send_message(message.channel,
-                'my available commands are: `!list` `!add example.com` `!remove example.com`',
+                'my available commands are: `!say` `!list` `!add` `!remove`',
             )
 
+        # any bot command below this line is only accessible by server administrators
+        if not message.author.server_permissions.administrator:
+            return
+
         # whitelist functions are below here
-        # TODO: split bot commands off into their own functions, and call them here instead
+        # TODO: split bot commands into their own functions, and call them instead
         success = False
         if message.content[0:4] == '!add':
             for substr in message.content.split():
@@ -84,7 +91,9 @@ async def on_message(message):
                     success = True
             else:
                 if not success:
-                    return await bot.send_message(message.channel, "sorry, couldn't do that")
+                    return await bot.send_message(message.channel,
+                        "please specify a domain to add, i.e.: `!add example.com`"
+                    )
 
         if message.content[0:7] == '!remove':
             for substr in message.content.split():
@@ -94,7 +103,9 @@ async def on_message(message):
                         success = True
             else:
                 if not success:
-                    return await bot.send_message(message.channel, "sorry, couldn't do that")
+                    return await bot.send_message(message.channel,
+                        "please specify a domain to remove, i.e.: `!remove example.com`"
+                    )
 
         if success or message.content[0:5] == '!list':
             return await bot.send_message(message.channel,
