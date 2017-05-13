@@ -40,7 +40,8 @@ async def on_message_delete(message):
 @bot.event
 async def on_message(message):
     """scan all messages from users without any roles (i.e.: non-members) for
-    urls, and delete the entire message if the urls aren't on the whitelist"""
+    urls, and delete the entire message if the urls aren't on the whitelist
+    also the bot commands are here because why not :("""
 
     # log all messages
     if message.channel.name is not None:
@@ -92,7 +93,7 @@ async def on_message(message):
             else:
                 if not success:
                     return await bot.send_message(message.channel,
-                        "please specify a domain to add, i.e.: `!add example.com`"
+                        'please specify a domain to add, i.e.: `!add example.com`'
                     )
 
         if message.content[0:7] == '!remove':
@@ -104,7 +105,7 @@ async def on_message(message):
             else:
                 if not success:
                     return await bot.send_message(message.channel,
-                        "please specify a domain to remove, i.e.: `!remove example.com`"
+                        'please specify a domain to remove, i.e.: `!remove example.com`'
                     )
 
         if success or message.content[0:5] == '!list':
@@ -144,6 +145,7 @@ async def on_message(message):
 
 @bot.event
 async def on_ready():
+    # TODO: code to set/save the current nickname
     debug('login: {}#{}'.format(bot.user.name, bot.user.discriminator))
     for server in bot.servers:
         if server.get_member(bot.user.id).display_name != SHRUGGIE_NICK_NAME:
