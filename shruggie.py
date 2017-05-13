@@ -38,9 +38,9 @@ async def on_message_delete(message):
 
 @bot.event
 async def on_message(message):
-    """scan all messages from users without any roles (i.e.: non-members) for
-    urls, and delete the entire message if the urls aren't on the whitelist
-    also the bot commands are here because why not :("""
+    """scan all messages from users without any roles (i.e. non-members)
+    for urls, and delete the entire message if the urls aren't on the
+    whitelist. also the bot commands are here because why not :("""
 
     # log all messages
     if message.channel.name is not None:
@@ -50,9 +50,11 @@ async def on_message(message):
             message.content,
         ))
 
-    # !repr :3
-    if message.channel.name == 'technical-nonsense' and message.content[0:5] == '!repr':
-        return await bot.send_message(message.channel, repr(bot))
+    # !repr :3 just a diagnostic function, so i can look inside things
+    if (message.channel.name == 'technical-nonsense' and
+        message.content[0:5] == '!repr':
+        # TODO: parse arguments, if any
+        return await bot.send_message(message.channel, repr(dir(bot)))
 
     # handle admin commands
     if message.channel.name == 'mod-channel'
@@ -117,8 +119,9 @@ async def on_message(message):
             for substr in message.content.split():
                 if 'http' in substr:
                     for url in whitelist:
-                        if re.search('https?://([a-z]+[.])*' + url, substr):
-                            # if a whitelisted site is found, exit inner for loop 
+                        if re.search('https?://([a-z]+[.])*{}'.format(url),
+                                substr):
+                            # if on the whitelist, break out of inner for loop
                             break
                     else:
                         # if not on the whitelist, delete the message
@@ -128,14 +131,13 @@ async def on_message(message):
                             repr(message.content),
                         ))
                         await bot.delete_message(message)
-                        mod_channel = discord.utils.get(message.server.channels,
+                        channel = discord.utils.get(message.server.channels,
                             name='mod-channel',
                             type=discord.ChannelType.text,
                         )
-                        return await bot.send_message(mod_channel,
-                            'deleted message from {}: ```{} {}#{}: {}```'.format(
+                        return await bot.send_message(channel,
+                            'deleted message from {}: ```{}#{}: {}```'.format(
                                 message.author.mention,
-                                message.timestamp.strftime('[%I:%M %p]'),
                                 message.author.name,
                                 message.author.discriminator,
                                 message.content,
