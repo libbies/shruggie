@@ -44,7 +44,7 @@ async def on_message(message):
 
     # log all messages
     if message.channel.name is not None:
-        logger(message.channel.name).debug("{}#{}: {}".format(
+        logger(message.channel.name).debug('{}#{}: {}'.format(
             message.author.display_name,
             message.author.discriminator,
             message.content,
@@ -58,24 +58,25 @@ async def on_message(message):
     if message.channel.name == 'mod-channel' and message.author.server_permissions.administrator:
         if message.content[0:4] == '!say':
             channel = message.content.split()[1]
-            if channel[0:2] == '<#' and channel[-1] == '>':
-                dst = message.server.get_channel(channel[2:-1])
+            if channel[0:2] == '<#' and ch[-1] == '>':
+                channel = message.server.get_channel(channel[2:-1])
             else:
-                dst = discord.utils.get(message.server.channels,
+                channel = discord.utils.get(message.server.channels,
                     name=channel,
                     type=discord.ChannelType.text
                 )
-            if not dst:
-                return await bot.send_message(message.channel, "no such channel")
-            return await bot.send_message(dst,
-                " ".join(message.content.split()[2:]),
-            )
+            if not channel:
+                return await bot.send_message(message.channel, 'no such channel')
+            return await bot.send_message(channel, ' '.join(message.content.split()[2:]))
 
-        success = False
         if message.content[0:5] == '!help':
             return await bot.send_message(message.channel,
-                "my available commands are: `!list` `!add example.com` `!remove example.com`",
+                'my available commands are: `!list` `!add example.com` `!remove example.com`',
             )
+
+        # whitelist functions are below here
+        # TODO: split bot commands off into their own functions, and call them here instead
+        success = False
         if message.content[0:4] == '!add':
             for substr in message.content.split():
                 if re.search('^[a-z]+[.][a-z]+$', substr):
@@ -84,6 +85,7 @@ async def on_message(message):
             else:
                 if not success:
                     return await bot.send_message(message.channel, "sorry, couldn't do that")
+
         if message.content[0:7] == '!remove':
             for substr in message.content.split():
                 if re.search('^[a-z]+[.][a-z]+$', substr):
@@ -93,9 +95,10 @@ async def on_message(message):
             else:
                 if not success:
                     return await bot.send_message(message.channel, "sorry, couldn't do that")
+
         if success or message.content[0:5] == '!list':
             return await bot.send_message(message.channel,
-                "whitelist contains: ```{}```".format(repr(whitelist))
+                'whitelist contains: ```{}```'.format(repr(whitelist))
             )
 
     # default role is the implicit 'everyone'; only one role means non-member
@@ -122,7 +125,7 @@ async def on_message(message):
                         return await bot.send_message(mod_channel,
                             'deleted message from {}: ```{} {}#{}: {}```'.format(
                                 message.author.mention,
-                                message.timestamp.strftime("[%I:%M %p]"),
+                                message.timestamp.strftime('[%I:%M %p]'),
                                 message.author.name,
                                 message.author.discriminator,
                                 message.content,
@@ -140,4 +143,4 @@ async def on_ready():
 try:
     bot.run(SHRUGGIE_APP_TOKEN)
 except:
-    logger('debug').exception("exception:")
+    logger('debug').exception('exception:')
