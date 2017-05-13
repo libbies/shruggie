@@ -52,12 +52,12 @@ async def on_message(message):
 
     # !repr :3 just a diagnostic function, so i can look inside things
     if (message.channel.name == 'technical-nonsense' and
-        message.content[0:5] == '!repr':
+        message.content[0:5] == '!repr'):
         # TODO: parse arguments, if any
         return await bot.send_message(message.channel, repr(dir(bot)))
 
     # handle admin commands
-    if message.channel.name == 'mod-channel'
+    if message.channel.name == 'mod-channel':
         # print a list of the bot's commands
         if message.content[0:5] == '!help':
             return await bot.send_message(message.channel,
