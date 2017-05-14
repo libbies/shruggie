@@ -10,7 +10,7 @@ def logger(name):
     logs[name] = logging.getLogger(name)
     # FIXME: SHRUGGIE_LOG_LVL doesn't quite work right...
     #   the log() function writes to the debug log file despite this setting
-    logs[name].setLevel(logging.DEBUG else SHRUGGIE_LOG_LVL)
+    logs[name].setLevel(logging.DEBUG if name else SHRUGGIE_LOG_LVL)
     if not len(logs[name].handlers):
         handler = logging.FileHandler('{}/{}.log'.format(SHRUGGIE_LOG_DIR,
             name if name else 'debug')
