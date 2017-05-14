@@ -54,7 +54,9 @@ async def on_message(message):
     if (message.channel.name == 'technical-nonsense' and
         message.content[0:5] == '!repr'):
         # TODO: parse arguments, if any
-        return await bot.send_message(message.channel, repr(dir(message)))
+        return await bot.send_message(message.channel,
+            repr(message.server.get_channel(message.content.split()[1][2:-1]))
+        )
 
     # handle admin commands
     if message.channel.name == 'mod-channel':
@@ -67,7 +69,7 @@ async def on_message(message):
         # have the bot say something in another channel:
         if message.content[0:4] == '!say':
             channel = message.content.split()[1]
-            if channel[0:2] == '<#' and ch[-1] == '>':
+            if channel[0:2] == '<#' and channel[-1] == '>':
                 channel = message.server.get_channel(channel[2:-1])
             else:
                 channel = discord.utils.get(message.server.channels,
