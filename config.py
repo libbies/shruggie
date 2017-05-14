@@ -9,4 +9,4 @@ SHRUGGIE_NICK_NAME="┐('～')┌"
 SHRUGGIE_LOG_DIR='/home/_shruggie/logs'
 
 # log level
-SHRUGGIE_LOG_LVL='DEBUG'
+SHRUGGIE_LOG_LVL='WARNING'

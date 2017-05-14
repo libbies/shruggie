@@ -15,12 +15,12 @@ def logger(name):
         handler = logging.FileHandler('{}/{}.log'.format(SHRUGGIE_LOG_DIR,
             name if name else 'debug')
         )
-        handler.setFormatter(logging.Formatter('[%(asctime)s] %(message)s'))
+        handler.setFormatter(logging.Formatter('[%(asctime)s] (%(levelno)s) %(message)s'))
         logs[name].addHandler(handler)
     return logs[name]
 
 def debug(message):
-    logger(None).debug(message)
+    logger(None).warning(message)
 
 def log(name, message):
     logger(name).info(message)
