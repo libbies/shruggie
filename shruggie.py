@@ -3,7 +3,7 @@ import discord
 import re
 
 from config import *
-from helpers import logger, debug
+from helpers import logger, debug, log
 
 bot = discord.Client()
 
@@ -21,7 +21,7 @@ whitelist = [
 @bot.event
 async def on_message_edit(bmessage, message):
     """log edited messages"""
-    logger(message.channel.name).debug('{}#{}: {} (edited)'.format(
+    log(message.channel.name, '{}#{}: {} (edited)'.format(
         message.author.display_name,
         message.author.discriminator,
         message.content,
@@ -30,7 +30,7 @@ async def on_message_edit(bmessage, message):
 @bot.event
 async def on_message_delete(message):
     """log deleted messages"""
-    logger(message.channel.name).debug('{}#{}: {} (deleted)'.format(
+    log(message.channel.name, '{}#{}: {} (deleted)'.format(
         message.author.display_name,
         message.author.discriminator,
         message.content,
@@ -44,7 +44,7 @@ async def on_message(message):
 
     # log all messages
     if message.channel.name is not None:
-        logger(message.channel.name).debug('{}#{}: {}'.format(
+        log(message.channel.name, '{}#{}: {}'.format(
             message.author.display_name,
             message.author.discriminator,
             message.content,
@@ -161,4 +161,4 @@ async def on_ready():
 try:
     bot.run(SHRUGGIE_APP_TOKEN)
 except:
-    logger('debug').exception('exception:')
+    logger(None).exception('exception:')
