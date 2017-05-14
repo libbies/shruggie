@@ -54,7 +54,7 @@ async def on_message(message):
     if (message.channel.name == 'technical-nonsense' and
         message.content[0:5] == '!repr'):
         # TODO: parse arguments, if any
-        return await bot.send_message(message.channel, repr(dir(bot)))
+        return await bot.send_message(message.channel, repr(dir(message)))
 
     # handle admin commands
     if message.channel.name == 'mod-channel':
