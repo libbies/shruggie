@@ -7,3 +7,6 @@ SHRUGGIE_NICK_NAME="┐('～')┌"
 
 # the log file directory
 SHRUGGIE_LOG_DIR='/home/_shruggie/logs'
+
+# log level
+SHRUGGIE_LOG_LVL='INFO'
