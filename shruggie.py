@@ -59,7 +59,7 @@ async def on_message(message):
         )
 
     # handle admin/mod commands
-    if message.channel.name == 'mod-channel' and message.content[0] == '!':
+    if message.channel.name == 'mod-channel':
         return await admin_command(message)
 
     # filter urls that are not on the whitelist
@@ -94,16 +94,19 @@ async def on_message(message):
                             ))
 
 async def admin_command(message):
+    # we can probably break all of these into their own individual functions
+    # probably in a seperate .py file, maybe?
     cmd = message.content.split()[0]
     if cmd[0] == SHRUGGIE_CMD_PREFIX:
+        cmd = cmd[1:]
         # print a list of the bot's commands
-        if cmd == '!help':
+        if cmd == 'help':
             return await bot.send_message(message.channel,
                 'my available commands are: `!say` `!timeout` `!list` `!add` `!remove`',
             )
 
         # put a user into timeout
-        if cmd == '!timeout':
+        if cmd == 'timeout':
             user = message.content.split()[1]
             if user[0:2] == '<@' and user[-1] == '>':
                 user = message.server.get_member(user[2:-1])
@@ -113,7 +116,7 @@ async def admin_command(message):
             return await bot.add_roles(user, role) 
 
         # put a user into timeout
-        if cmd == '!untimeout':
+        if cmd == 'untimeout':
             user = message.content.split()[1]
             if user[0:2] == '<@' and user[-1] == '>':
                 user = message.server.get_member(user[2:-1])
@@ -123,7 +126,7 @@ async def admin_command(message):
             return await bot.remove_roles(user, role) 
 
         # have the bot say something in another channel:
-        if cmd == '!say':
+        if cmd == 'say':
             channel = message.content.split()[1]
             if channel[0:2] == '<#' and channel[-1] == '>':
                 channel = message.server.get_channel(channel[2:-1])
@@ -147,7 +150,7 @@ async def admin_command(message):
         # success used to track if add/remove items to whitelist worked or not
         success = False
         # add item to whitelist
-        if cmd == '!add':
+        if cmd == 'add':
             for substr in message.content.split():
                 if re.search('^[a-z]+[.][a-z]+$', substr):
                     whitelist.append(substr)
@@ -159,7 +162,7 @@ async def admin_command(message):
                     )
 
         # remove item from whitelist
-        if cmd == '!remove':
+        if cmd == 'remove':
             for substr in message.content.split():
                 if re.search('^[a-z]+[.][a-z]+$', substr):
                     if substr in whitelist:
@@ -172,7 +175,7 @@ async def admin_command(message):
                     )
 
         # print the whitelist, or, if add/remote worked, print the whitelist
-        if cmd == '!list' or success:
+        if cmd == 'list' or success:
             return await bot.send_message(message.channel,
                 'whitelist contains: ```{}```'.format(repr(whitelist))
             )
