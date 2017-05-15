@@ -50,76 +50,19 @@ async def on_message(message):
             message.content,
         ))
 
-    # !repr :3 just a diagnostic function, so i can look inside things
+    # !repr - just a diagnostic function, so i can look inside things
     if (message.channel.name == 'technical-nonsense' and
         message.content[0:5] == '!repr'):
-        # TODO: parse arguments, if any
+        # TODO: parse arguments directly from the message
         return await bot.send_message(message.channel,
-            repr(message.server.get_channel(message.content.split()[1][2:-1]))
+            repr(message.server.get_member(message.content.split()[1][3:-1]))
         )
 
-    # handle admin commands
-    if message.channel.name == 'mod-channel':
-        # print a list of the bot's commands
-        if message.content[0:5] == '!help':
-            return await bot.send_message(message.channel,
-                'my available commands are: `!say` `!list` `!add` `!remove`',
-            )
+    # handle admin/mod commands
+    if message.channel.name == 'mod-channel' and message.content[0] == '!':
+        return await admin_command(message)
 
-        # have the bot say something in another channel:
-        if message.content[0:4] == '!say':
-            channel = message.content.split()[1]
-            if channel[0:2] == '<#' and channel[-1] == '>':
-                channel = message.server.get_channel(channel[2:-1])
-            else:
-                channel = discord.utils.get(message.server.channels,
-                    name=channel,
-                    type=discord.ChannelType.text
-                )
-            if not channel:
-                return await bot.send_message(message.channel,
-                    'no such channel'
-                )
-            return await bot.send_message(channel,
-                ' '.join(message.content.split()[2:])
-            )
-
-        # any command below here is only accessible by server admins
-        if not message.author.server_permissions.administrator:
-            return
-
-        # whitelist functions are below here
-        # TODO: split bot commands into their own functions
-        #   and wrap them up below or call them directly
-        success = False
-        if message.content[0:4] == '!add':
-            for substr in message.content.split():
-                if re.search('^[a-z]+[.][a-z]+$', substr):
-                    whitelist.append(substr)
-                    success = True
-            else:
-                if not success:
-                    return await bot.send_message(message.channel,
-                        'specify domain(s) to add: `!add example.com`'
-                    )
-
-        if message.content[0:7] == '!remove':
-            for substr in message.content.split():
-                if re.search('^[a-z]+[.][a-z]+$', substr):
-                    if substr in whitelist:
-                        whitelist.remove(substr)
-                        success = True
-            else:
-                if not success:
-                    return await bot.send_message(message.channel,
-                        'specify domain(s) to remove: `!remove example.com`'
-                    )
-
-        if success or message.content[0:5] == '!list':
-            return await bot.send_message(message.channel,
-                'whitelist contains: ```{}```'.format(repr(whitelist))
-            )
-
+    # filter urls that are not on the whitelist
     # default role is the implicit 'everyone'; only one role means non-member
     if len(message.author.roles) == 1:
         if 'http' in message.content:
@@ -150,14 +93,98 @@ async def on_message(message):
                                 message.content,
                             ))
 
+async def admin_command(message):
+    cmd = message.content.split()[0]
+    if cmd[0] == SHRUGGIE_CMD_PREFIX:
+        # print a list of the bot's commands
+        if cmd == '!help':
+            return await bot.send_message(message.channel,
+                'my available commands are: `!say` `!timeout` `!list` `!add` `!remove`',
+            )
+
+        # put a user into timeout
+        if cmd == '!timeout':
+            user = message.content.split()[1]
+            if user[0:2] == '<@' and user[-1] == '>':
+                user = message.server.get_member(user[2:-1])
+            else:
+                user = discord.utils.get(message.server.members, name=user)
+            role = discord.utils.get(message.server.roles, name='timeout')
+            return await bot.add_roles(user, role) 
+
+        # put a user into timeout
+        if cmd == '!untimeout':
+            user = message.content.split()[1]
+            if user[0:2] == '<@' and user[-1] == '>':
+                user = message.server.get_member(user[2:-1])
+            else:
+                user = discord.utils.get(message.server.members, name=user)
+            role = discord.utils.get(message.server.roles, name='timeout')
+            return await bot.remove_roles(user, role) 
+
+        # have the bot say something in another channel:
+        if cmd == '!say':
+            channel = message.content.split()[1]
+            if channel[0:2] == '<#' and channel[-1] == '>':
+                channel = message.server.get_channel(channel[2:-1])
+            else:
+                channel = discord.utils.get(message.server.channels,
+                    name=channel,
+                    type=discord.ChannelType.text
+                )
+            if not channel:
+                return await bot.send_message(message.channel,
+                    'no such channel'
+                )
+            return await bot.send_message(channel,
+                ' '.join(message.content.split()[2:])
+            )
+
+        # any command below here is only accessible by server admins
+        if not message.author.server_permissions.administrator:
+            return
+
+        # success used to track if add/remove items to whitelist worked or not
+        success = False
+        # add item to whitelist
+        if cmd == '!add':
+            for substr in message.content.split():
+                if re.search('^[a-z]+[.][a-z]+$', substr):
+                    whitelist.append(substr)
+                    success = True
+            else:
+                if not success:
+                    return await bot.send_message(message.channel,
+                        'specify domain(s) to add: `!add example.com`'
+                    )
+
+        # remove item from whitelist
+        if cmd == '!remove':
+            for substr in message.content.split():
+                if re.search('^[a-z]+[.][a-z]+$', substr):
+                    if substr in whitelist:
+                        whitelist.remove(substr)
+                        success = True
+            else:
+                if not success:
+                    return await bot.send_message(message.channel,
+                        'specify domain(s) to remove: `!remove example.com`'
+                    )
+
+        # print the whitelist, or, if add/remote worked, print the whitelist
+        if cmd == '!list' or success:
+            return await bot.send_message(message.channel,
+                'whitelist contains: ```{}```'.format(repr(whitelist))
+            )
+
 @bot.event
 async def on_ready():
     # TODO: code to set/save the current nickname
     debug('login: {}#{}'.format(bot.user.name, bot.user.discriminator))
     for server in bot.servers:
-        if server.get_member(bot.user.id).display_name != SHRUGGIE_NICK_NAME:
+        if server.get_member(bot.user.id).display_name != SHRUGGIE_NICKNAME:
             await bot.change_nickname(server.get_member(bot.user.id),
-                SHRUGGIE_NICK_NAME,
+                SHRUGGIE_NICKNAME,
             )
 
 try:
