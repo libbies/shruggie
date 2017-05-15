@@ -22,7 +22,7 @@ whitelist = [
 async def on_message_edit(bmessage, message):
     """log edited messages"""
     log(message.channel.name, '{}#{}: {} (edited)'.format(
-        message.author.display_name,
+        message.author.name,
         message.author.discriminator,
         message.content,
     ))
@@ -31,7 +31,7 @@ async def on_message_edit(bmessage, message):
 async def on_message_delete(message):
     """log deleted messages"""
     log(message.channel.name, '{}#{}: {} (deleted)'.format(
-        message.author.display_name,
+        message.author.name,
         message.author.discriminator,
         message.content,
     ))
@@ -45,7 +45,7 @@ async def on_message(message):
     # log all messages
     if message.channel.name is not None:
         log(message.channel.name, '{}#{}: {}'.format(
-            message.author.display_name,
+            message.author.name,
             message.author.discriminator,
             message.content,
         ))
@@ -75,8 +75,8 @@ async def on_message(message):
                             break
                     else:
                         # if not on the whitelist, delete the message
-                        debug('deleted message from {}#{}: {}'.format(
-                            message.author.display_name,
+                        debug('{}#{}: {} (filtered)'.format(
+                            message.author.name,
                             message.author.discriminator,
                             repr(message.content),
                         ))
@@ -86,7 +86,7 @@ async def on_message(message):
                             type=discord.ChannelType.text,
                         )
                         return await bot.send_message(channel,
-                            'deleted message from {}: ```{}#{}: {}```'.format(
+                            'filtered message from {}: ```{}#{}: {}```'.format(
                                 message.author.mention,
                                 message.author.name,
                                 message.author.discriminator,
