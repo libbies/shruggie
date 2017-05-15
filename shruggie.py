@@ -75,7 +75,7 @@ async def on_message(message):
                             break
                     else:
                         # if not on the whitelist, delete the message
-                        debug('{}#{}: {} (filtered)'.format(
+                        log(message.channel, '{}#{}: {} (filtered)'.format(
                             message.author.name,
                             message.author.discriminator,
                             repr(message.content),
