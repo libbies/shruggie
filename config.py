@@ -14,3 +14,6 @@ SHRUGGIE_LOG_LVL='WARNING'
 # command prefix 
 # TODO: save/load config dynamically
 SHRUGGIE_CMD_PREFIX='!'
+
+# minor/under-18 role name
+SHRUGGIE_KID_ROLE='whippersnappers'

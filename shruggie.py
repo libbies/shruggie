@@ -16,6 +16,10 @@ whitelist = [
     'redd.it',
     'gfycat.com',
     'twitter.com',
+    'wikipedia.org',
+    'cnn.com',
+    'nytimes.com',
+    'washingtonpost.com',
 ]
 
 @bot.event
@@ -64,7 +68,8 @@ async def on_message(message):
 
     # filter urls that are not on the whitelist
     # default role is the implicit 'everyone'; only one role means non-member
-    if len(message.author.roles) == 1:
+    if (len(message.author.roles) == 1 or
+        discord.utils.get(message.author.roles, name=SHRUGGIE_KID_ROLE)):
         if 'http' in message.content:
             for substr in message.content.split():
                 if 'http' in substr:
@@ -88,7 +93,7 @@ async def on_message(message):
                         return await bot.send_message(channel,
                             'filtered message from {} in {}: ```{}#{}: {}```'.format(
                                 message.author.mention,
-                                message.channel.name,
+                                message.channel.mention,
                                 message.author.name,
                                 message.author.discriminator,
                                 message.content,
