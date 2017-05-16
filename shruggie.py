@@ -75,7 +75,7 @@ async def on_message(message):
                             break
                     else:
                         # if not on the whitelist, delete the message
-                        log(message.channel, '{}#{}: {} (filtered)'.format(
+                        log(message.channel.name, '{}#{}: {} (filtered)'.format(
                             message.author.name,
                             message.author.discriminator,
                             repr(message.content),
@@ -86,8 +86,9 @@ async def on_message(message):
                             type=discord.ChannelType.text,
                         )
                         return await bot.send_message(channel,
-                            'filtered message from {}: ```{}#{}: {}```'.format(
+                            'filtered message from {} in {}: ```{}#{}: {}```'.format(
                                 message.author.mention,
+                                message.channel.name,
                                 message.author.name,
                                 message.author.discriminator,
                                 message.content,
