@@ -108,7 +108,7 @@ async def admin_command(message):
         # print a list of the bot's commands
         if cmd == 'help':
             return await bot.send_message(message.channel,
-                'my available commands are: `!say` `!timeout` `!list` `!add` `!remove`',
+                'my available commands are: `!say` `!timeout` `!whitelist` `!add` `!remove`',
             )
 
         # put a user into timeout
@@ -181,7 +181,7 @@ async def admin_command(message):
                     )
 
         # print the whitelist, or, if add/remote worked, print the whitelist
-        if cmd == 'list' or success:
+        if cmd == 'whitelist' or success:
             return await bot.send_message(message.channel,
                 'whitelist contains: ```{}```'.format(repr(whitelist))
             )
