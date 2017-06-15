@@ -16,4 +16,4 @@ SHRUGGIE_LOG_LVL='WARNING'
 SHRUGGIE_CMD_PREFIX='!'
 
 # minor/under-18 role name
-SHRUGGIE_KID_ROLE='whippersnappers'
+SHRUGGIE_KID_ROLE='kittens'
