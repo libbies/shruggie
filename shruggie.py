@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import discord
 import re
+import datetime
 
 from config import *
 from helpers import logger, debug, log
@@ -20,6 +21,7 @@ whitelist = [
     'cnn.com',
     'nytimes.com',
     'washingtonpost.com',
+    'images.discordapp.net',
 ]
 
 @bot.event
@@ -39,6 +41,30 @@ async def on_message_delete(message):
         message.author.discriminator,
         message.content,
     ))
+
+@bot.event
+async def on_member_join(member):
+    # if an user account is under 15 minutes old, send them to #safe-space
+    if 901 > (datetime.datetime.now() - member.created_at).total_seconds():
+        if discord.utils.get(member.roles, name='timeout'):
+            return
+        await bot.add_roles(member,
+            # discord.utils.get(member.server.roles, name='timeout'),
+            discord.utils.get(member.server.roles, name='probationary'),
+        )
+        channel = discord.utils.get(member.server.channels,
+            name='mod-channel',
+            type=discord.ChannelType.text,
+        )
+        return await bot.send_message(channel,
+            "new user: {}```{}#{}\ncreated: {}\nage (minutes): {}```".format(
+                member.mention,
+                member.name,
+                member.discriminator,
+                member.created_at,
+                (datetime.datetime.now() - member.created_at).total_seconds() / 60
+            )
+        )
 
 @bot.event
 async def on_message(message):
@@ -68,8 +94,17 @@ async def on_message(message):
 
     # filter urls that are not on the whitelist
     # default role is the implicit 'everyone'; only one role means non-member
-    if (len(message.author.roles) == 1 or
-        discord.utils.get(message.author.roles, name=SHRUGGIE_KID_ROLE)):
+    if (len(message.author.roles) == 1
+        or discord.utils.get(message.author.roles, name=SHRUGGIE_KID_ROLE
+        or discord.utils.get(message.author.roles, name='probationary'))):
+        if '(((' in message.content and ')))' in message.content:
+            return await bot.add_roles(member,
+                discord.utils.get(member.server.roles, name='timeout'),
+            )
+        if 'libbies' in message.content and 'fish' in message.content:
+            return await bot.add_roles(member,
+                discord.utils.get(member.server.roles, name='timeout'),
+            )
         if 'http' in message.content:
             for substr in message.content.split():
                 if 'http' in substr:
@@ -119,7 +154,7 @@ async def admin_command(message):
             else:
                 user = discord.utils.get(message.server.members, name=user)
             role = discord.utils.get(message.server.roles, name='timeout')
-            return await bot.add_roles(user, role) 
+            return await bot.replace_roles(user, role) 
 
         # put a user into timeout
         if cmd == 'untimeout':
